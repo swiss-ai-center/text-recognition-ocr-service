@@ -1,9 +1,14 @@
 # Base image
 FROM python:3.11
+#FROM ubuntu:18.04
+RUN apt-get update
+#RUN apt-get install -y software-properties-common add-apt-repository -y ppa:alex-p/tesseract-ocr
+RUN apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev
+RUN apt-get install -y tesseract-ocr-all
+RUN apt-get install -y python3-pip python3-minimal libsm6 libxext6
 
-# Install all required packages to run the model
-# TODO: 1. Add any additional packages required to run your model
-# RUN apt update && apt install --yes package1 package2 ...
+# To make sure that tesseract-ocr is installed, uncomment the following line.
+RUN tesseract --version
 
 # Work directory
 WORKDIR /app
@@ -31,6 +36,9 @@ EXPOSE 80
 
 # Switch to src directory
 WORKDIR "/app/src"
+
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
+ENV PATH="/usr/bin:${PATH}"
 
 # Command to run on start
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

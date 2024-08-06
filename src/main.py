@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,15 +20,29 @@ from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
 
 # Imports required by the service's model
-# TODO: 1. ADD REQUIRED IMPORTS (ALSO IN THE REQUIREMENTS.TXT)
+from text_recognition import TextRecognition
+import io
+import csv
+import pytesseract as pt
+from PIL import Image
+from typing import cast
+from models import *
+
+import traceback
+from fastapi.logger import logger
+import logging
 
 settings = get_settings()
 
+# ------- TEMPORARY STUFF -----------
+mlogger = logging.getLogger('uvicorn.error')
+logger.setLevel(logging.DEBUG)
+pt.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+
 
 class MyService(Service):
-    # TODO: 2. CHANGE THIS DESCRIPTION
     """
-    My service model
+    OCR service model
     """
 
     # Any additional fields must be excluded for Pydantic to work
@@ -36,22 +51,16 @@ class MyService(Service):
 
     def __init__(self):
         super().__init__(
-            # TODO: 3. CHANGE THE SERVICE NAME AND SLUG
-            name="My Service",
-            slug="my-service",
+            name="Text Recognition",
+            slug="text-recognition",
             url=settings.service_url,
             summary=api_summary,
             description=api_description,
             status=ServiceStatus.AVAILABLE,
-            # TODO: 4. CHANGE THE INPUT AND OUTPUT FIELDS, THE TAGS AND THE HAS_AI VARIABLE
+
+            # TODO: FINISH EDITING THE INPUT AND OUTPUT FIELDS, THE TAGS AND THE HAS_AI VARIABLE
             data_in_fields=[
-                FieldDescription(
-                    name="image",
-                    type=[
-                        FieldDescriptionType.IMAGE_PNG,
-                        FieldDescriptionType.IMAGE_JPEG,
-                    ],
-                ),
+                FieldDescription(name="image", type=[FieldDescriptionType.IMAGE_PNG, FieldDescriptionType.IMAGE_JPEG]),
             ],
             data_out_fields=[
                 FieldDescription(
@@ -64,25 +73,36 @@ class MyService(Service):
                     acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING,
                 ),
             ],
-            has_ai=False,
+            has_ai=True,
             # OPTIONAL: CHANGE THE DOCS URL TO YOUR SERVICE'S DOCS
-            docs_url="https://docs.swiss-ai-center.ch/reference/core-concepts/service/",
+            # docs_url="https://docs.swiss-ai-center.ch/reference/core-concepts/service/",
         )
         self._logger = get_logger(settings)
 
     # TODO: 5. CHANGE THE PROCESS METHOD (CORE OF THE SERVICE)
     def process(self, data):
-        # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
-        # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
-        # before using them.
-        # raw = data["image"].data
-        # input_type = data["image"].type
-        # ... do something with the raw data
+        try:
+            # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
+            # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
+            # before using them.
+            # raw = data["image"].data
+            # input_type = data["image"].type
+            # ... do something with the raw data
 
-        # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
-        return {
-            "result": TaskData(data=..., type=FieldDescriptionType.APPLICATION_JSON)
-        }
+            tr = TextRecognition()
+            data = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
+            json_data = [d.toJSON() for d in data]
+            json_data = json.dumps(json_data)
+            #print(f"-------------------------------------------------------\n{data}\n-------------------------------------------------------------")
+            # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
+            return {
+                "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON)
+            }
+        except:
+            traceback.print_exc()
+            return {
+                "result": ""
+            }
 
 
 service_service: ServiceService | None = None
@@ -136,18 +156,17 @@ async def lifespan(app: FastAPI):
 
 
 # TODO: 6. CHANGE THE API DESCRIPTION AND SUMMARY
-api_description = """My service
-bla bla bla...
+api_description = """Get a JSON file containing the text in the input image and its position.
 """
 api_summary = """My service
-bla bla bla...
+Get a JSON file containing the text in the input image and its position.
 """
 
 # Define the FastAPI application with information
 # TODO: 7. CHANGE THE API TITLE, VERSION, CONTACT AND LICENSE
 app = FastAPI(
     lifespan=lifespan,
-    title="Sample Service API.",
+    title="Text Recognition API.",
     description=api_description,
     version="0.0.1",
     contact={
