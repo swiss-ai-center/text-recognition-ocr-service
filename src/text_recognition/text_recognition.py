@@ -2,11 +2,12 @@
 import io
 import csv
 import pytesseract as pt
-from PIL import Image
+from PIL import Image, ImageDraw
 from typing import cast
 from models import *
 from common_code.common.enums import FieldDescriptionType
 from typing import Union
+import cv2
 
 class TextRecognition:
 
@@ -22,7 +23,7 @@ class TextRecognition:
         with Image.open(config.image.file) as image:
             return pt.image_to_string(image=image, lang=config.language)
 
-    def image_to_data(self, data, img_type: Union[FieldDescriptionType.IMAGE_JPEG, FieldDescriptionType.IMAGE_PNG]) -> list[DataElementOut]:
+    def image_to_data(self, data, img_type) -> list[DataElementOut]:
 
         imageStream = io.BytesIO(data)
         image = Image.open(imageStream)
@@ -53,3 +54,14 @@ class TextRecognition:
                 )
             )
         return data_out
+
+    def draw_bounding_boxes(self, data, data_out):
+        imageStream = io.BytesIO(data)
+        image = Image.open(imageStream)
+        image = ImageDraw.Draw(image)
+        for elt in data_out:
+            box = elt.position
+            x, y, w, h = box['left'], box['top'], box['width'], box['height']
+            shape = [x, y, x + w, y + h]
+            image.rectangle(shape, fill = None, outline="red")
+        return image._image
