@@ -60,7 +60,6 @@ class MyService(Service):
             description=api_description,
             status=ServiceStatus.AVAILABLE,
 
-            # TODO: FINISH EDITING THE INPUT AND OUTPUT FIELDS, THE TAGS AND THE HAS_AI VARIABLE
             data_in_fields=[
                 FieldDescription(name="image", type=[FieldDescriptionType.IMAGE_PNG, FieldDescriptionType.IMAGE_JPEG]),
             ],
@@ -68,7 +67,8 @@ class MyService(Service):
                 FieldDescription(
                     name="result", type=[FieldDescriptionType.APPLICATION_JSON]
                 ),
-                FieldDescription(name="bounding boxes", type=[FieldDescriptionType.IMAGE_PNG])
+                # TODO: put that in another microservice
+                #FieldDescription(name="bounding boxes", type=[FieldDescriptionType.IMAGE_PNG])
             ],
             tags=[
                 ExecutionUnitTag(
@@ -82,7 +82,6 @@ class MyService(Service):
         )
         self._logger = get_logger(settings)
 
-    # TODO: 5. CHANGE THE PROCESS METHOD (CORE OF THE SERVICE)
     def process(self, data):
         try:
             # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
@@ -97,12 +96,12 @@ class MyService(Service):
             json_data = [d.toJSON() for d in result]
             json_data = json.dumps(json_data)
 
-            boxes = tr.draw_bounding_boxes(data['image'].data, result)
-            is_ok, out_buff = cv2.imencode('.png', np.array(boxes))
+            #boxes = tr.draw_bounding_boxes(data['image'].data, result)
+            #is_ok, out_buff = cv2.imencode('.png', np.array(boxes))
             # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
             return {
                 "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON),
-                "bounding boxes": TaskData(data=out_buff.tobytes(), type=FieldDescriptionType.IMAGE_PNG)
+                #"bounding boxes": TaskData(data=out_buff.tobytes(), type=FieldDescriptionType.IMAGE_PNG)
             }
         except:
             traceback.print_exc()
@@ -161,15 +160,12 @@ async def lifespan(app: FastAPI):
         await service_service.graceful_shutdown(my_service, engine_url)
 
 
-# TODO: 6. CHANGE THE API DESCRIPTION AND SUMMARY
-api_description = """Get a JSON file containing the text in the input image and its position.
+api_description = """Returns a JSON file containing the text in the input image and its position.
 """
-api_summary = """My service
-Get a JSON file containing the text in the input image and its position.
+api_summary = """Returns a JSON file containing the text in the input image and its position.
 """
 
 # Define the FastAPI application with information
-# TODO: 7. CHANGE THE API TITLE, VERSION, CONTACT AND LICENSE
 app = FastAPI(
     lifespan=lifespan,
     title="Text Recognition API.",

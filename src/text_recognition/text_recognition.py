@@ -1,3 +1,4 @@
+# Code based on https://gitlab.forge.hefr.ch/icoservices/deepmarket/image/text-recognition
 
 import io
 import csv
