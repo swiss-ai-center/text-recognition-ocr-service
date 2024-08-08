@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,10 +20,11 @@ from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
 
 # Imports required by the service's model
-from text_recognition import TextRecognition
-from models import *
+from text_recognition.text_recognition import TextRecognition
+
 
 settings = get_settings()
+
 
 class MyService(Service):
     """
