@@ -18,7 +18,6 @@ from common_code.service.enums import ServiceStatus
 from common_code.common.enums import FieldDescriptionType, ExecutionUnitTagName, ExecutionUnitTagAcronym
 from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
-import cv2
 import numpy as np
 
 # Imports required by the service's model
@@ -35,12 +34,6 @@ from fastapi.logger import logger
 import logging
 
 settings = get_settings()
-
-# ------- TEMPORARY STUFF -----------
-mlogger = logging.getLogger('uvicorn.error')
-logger.setLevel(logging.DEBUG)
-pt.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
-
 
 class MyService(Service):
     """
@@ -68,7 +61,6 @@ class MyService(Service):
                     name="result", type=[FieldDescriptionType.APPLICATION_JSON]
                 ),
                 # TODO: put that in another microservice
-                #FieldDescription(name="bounding boxes", type=[FieldDescriptionType.IMAGE_PNG])
             ],
             tags=[
                 ExecutionUnitTag(
@@ -96,12 +88,9 @@ class MyService(Service):
             json_data = [d.toJSON() for d in result]
             json_data = json.dumps(json_data)
 
-            #boxes = tr.draw_bounding_boxes(data['image'].data, result)
-            #is_ok, out_buff = cv2.imencode('.png', np.array(boxes))
             # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
             return {
                 "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON),
-                #"bounding boxes": TaskData(data=out_buff.tobytes(), type=FieldDescriptionType.IMAGE_PNG)
             }
         except:
             traceback.print_exc()

@@ -6,9 +6,6 @@ import pytesseract as pt
 from PIL import Image, ImageDraw
 from typing import cast
 from models import *
-from common_code.common.enums import FieldDescriptionType
-from typing import Union
-import cv2
 
 class TextRecognition:
 
