@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional
 from fastapi import UploadFile, Form
-from fastapi.responses import FileResponse
 from enum import Enum
 import json
+
 
 class Language(str, Enum):
     FRENCH = "fra"
@@ -25,6 +24,7 @@ class DataElementPosition(BaseModel):
 
     def to_dict(self):
         return self.__dict__
+
     def toJSON(self):
         return json.dumps(
             self,

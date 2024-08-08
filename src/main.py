@@ -1,5 +1,4 @@
 import asyncio
-import json
 import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,20 +17,10 @@ from common_code.service.enums import ServiceStatus
 from common_code.common.enums import FieldDescriptionType, ExecutionUnitTagName, ExecutionUnitTagAcronym
 from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
-import numpy as np
 
 # Imports required by the service's model
 from text_recognition import TextRecognition
-import io
-import csv
-import pytesseract as pt
-from PIL import Image
-from typing import cast
 from models import *
-
-import traceback
-from fastapi.logger import logger
-import logging
 
 settings = get_settings()
 
@@ -75,28 +64,22 @@ class MyService(Service):
         self._logger = get_logger(settings)
 
     def process(self, data):
-        try:
-            # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
-            # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
-            # before using them.
-            # raw = data["image"].data
-            # input_type = data["image"].type
-            # ... do something with the raw data
+        # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
+        # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
+        # before using them.
+        # raw = data["image"].data
+        # input_type = data["image"].type
+        # ... do something with the raw data
 
-            tr = TextRecognition()
-            result = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
-            json_data = [d.toJSON() for d in result]
-            json_data = json.dumps(json_data)
+        tr = TextRecognition()
+        result = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
+        json_data = [d.toJSON() for d in result]
+        json_data = json.dumps(json_data)
 
-            # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
-            return {
-                "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON),
-            }
-        except:
-            traceback.print_exc()
-            return {
-                "result": ""
-            }
+        # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
+        return {
+            "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON),
+        }
 
 
 service_service: ServiceService | None = None

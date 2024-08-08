@@ -5,7 +5,8 @@ import csv
 import pytesseract as pt
 from PIL import Image, ImageDraw
 from typing import cast
-from models import *
+from models import DataElementOut, DataIn, DataElementPosition
+
 
 class TextRecognition:
 
@@ -61,5 +62,5 @@ class TextRecognition:
             box = elt.position
             x, y, w, h = box['left'], box['top'], box['width'], box['height']
             shape = [x, y, x + w, y + h]
-            image.rectangle(shape, fill = None, outline="red")
+            image.rectangle(shape, fill=None, outline="red")
         return image._image
