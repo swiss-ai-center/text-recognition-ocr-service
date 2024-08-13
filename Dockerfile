@@ -1,9 +1,11 @@
 # Base image
 FROM python:3.11
 #FROM ubuntu:18.04
+#RUN add-apt-repository ppa:alex-p/tesseract-ocr5
 RUN apt-get update
 #RUN apt-get install -y software-properties-common add-apt-repository -y ppa:alex-p/tesseract-ocr
-RUN apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev
+RUN apt-get install -y tesseract-ocr=5.3.0-2
+RUN apt-get install -y libtesseract-dev libleptonica-dev
 RUN apt-get install -y tesseract-ocr-all
 RUN apt-get install -y python3-pip python3-minimal libsm6 libxext6
 
@@ -37,7 +39,7 @@ EXPOSE 80
 # Switch to src directory
 WORKDIR "/app/src"
 
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata/
 ENV PATH="/usr/bin:${PATH}"
 
 # Command to run on start

@@ -51,7 +51,6 @@ class MyService(Service):
                 FieldDescription(
                     name="result", type=[FieldDescriptionType.APPLICATION_JSON]
                 ),
-                # TODO: put that in another microservice
             ],
             tags=[
                 ExecutionUnitTag(

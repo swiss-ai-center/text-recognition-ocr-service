@@ -1,5 +1,5 @@
 [project]
-name = "ocr-service"
+name = "text-recognition-ocr-service"
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
