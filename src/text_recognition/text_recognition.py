@@ -8,6 +8,8 @@ from typing import cast
 from models import DataElementOut, DataIn, DataElementPosition
 from json import JSONEncoder
 import json
+
+
 class CustomEncoder(JSONEncoder):
     def default(self, o):
         return json.dumps(

@@ -1,5 +1,4 @@
 import asyncio
-import json
 import time
 
 from fastapi import FastAPI
@@ -78,7 +77,7 @@ class MyService(Service):
         text_data = tr.image_to_string(data=data['image'].data)
 
         json_data = {'text': text_data,
-                    'boxes': img_data}
+                     'boxes': img_data}
         json_data = CustomEncoder().encode(json_data)
 
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
@@ -137,11 +136,12 @@ async def lifespan(app: FastAPI):
         await service_service.graceful_shutdown(my_service, engine_url)
 
 
-api_description = """This service extracts text from an image using Tesseract 5. The image is assumed to be a scanned document, 
+api_description = """This service extracts text from an image using Tesseract 5.
+The image is assumed to be a scanned document,
 already resized to appear flat and in the right orientation, submitted as png or jpg.
 The output is returned as a json file containing the plain text as well as detected words and their bounding boxes.
 """
-api_summary = """Returns a JSON file containing the text in the input image and its position, 
+api_summary = """Returns a JSON file containing the text in the input image and its position,
 using Tesseract 5 to detect text and bounding boxes.
 """
 

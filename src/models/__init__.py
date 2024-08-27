@@ -3,6 +3,7 @@ from fastapi import UploadFile, Form
 from enum import Enum
 import json
 
+
 class Language(str, Enum):
     FRENCH = "fra"
     ENGLISH = "eng"
