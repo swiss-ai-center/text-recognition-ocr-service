@@ -3,7 +3,6 @@ from fastapi import UploadFile, Form
 from enum import Enum
 import json
 
-
 class Language(str, Enum):
     FRENCH = "fra"
     ENGLISH = "eng"
@@ -24,13 +23,6 @@ class DataElementPosition(BaseModel):
 
     def to_dict(self):
         return self.__dict__
-
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
 
 
 class DataElementOut(BaseModel):

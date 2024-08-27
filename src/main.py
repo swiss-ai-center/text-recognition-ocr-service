@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -21,7 +22,7 @@ from contextlib import asynccontextmanager
 
 # Imports required by the service's model
 from text_recognition.text_recognition import TextRecognition
-
+from text_recognition.text_recognition import CustomEncoder
 
 settings = get_settings()
 
@@ -37,8 +38,8 @@ class MyService(Service):
 
     def __init__(self):
         super().__init__(
-            name="Text Recognition",
-            slug="text-recognition",
+            name="Text Recognition OCR",
+            slug="text-recognition-ocr",
             url=settings.service_url,
             summary=api_summary,
             description=api_description,
@@ -73,9 +74,12 @@ class MyService(Service):
         # ... do something with the raw data
 
         tr = TextRecognition()
-        result = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
-        json_data = [d.toJSON() for d in result]
-        json_data = json.dumps(json_data)
+        img_data = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
+        text_data = tr.image_to_string(data=data['image'].data)
+
+        json_data = {'text': text_data,
+                    'boxes': img_data}
+        json_data = CustomEncoder().encode(json_data)
 
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
         return {
@@ -133,15 +137,18 @@ async def lifespan(app: FastAPI):
         await service_service.graceful_shutdown(my_service, engine_url)
 
 
-api_description = """Returns a JSON file containing the text in the input image and its position.
+api_description = """This service extracts text from an image using Tesseract 5. The image is assumed to be a scanned document, 
+already resized to appear flat and in the right orientation, submitted as png or jpg.
+The output is returned as a json file containing the plain text as well as detected words and their bounding boxes.
 """
-api_summary = """Returns a JSON file containing the text in the input image and its position.
+api_summary = """Returns a JSON file containing the text in the input image and its position, 
+using Tesseract 5 to detect text and bounding boxes.
 """
 
 # Define the FastAPI application with information
 app = FastAPI(
     lifespan=lifespan,
-    title="Text Recognition API.",
+    title="Text Recognition OCR API.",
     description=api_description,
     version="0.0.1",
     contact={
