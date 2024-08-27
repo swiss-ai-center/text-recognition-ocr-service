@@ -74,6 +74,7 @@ class MyService(Service):
 
         tr = TextRecognition()
         img_data = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
+        img_data = [dp.to_dict() for dp in img_data if len(dp.text) > 0]
         text_data = tr.image_to_string(data=data['image'].data)
 
         json_data = {'text': text_data,

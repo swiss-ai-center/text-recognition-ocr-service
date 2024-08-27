@@ -45,6 +45,10 @@ class DataElementOut(BaseModel):
             sort_keys=True,
             indent=4)
 
+    def to_dict(self):
+        self.position = self.position.to_dict()
+        return self.__dict__
+
 
 class TextOut(BaseModel):
     result: str
