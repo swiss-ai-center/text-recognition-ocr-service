@@ -25,13 +25,6 @@ class DataElementPosition(BaseModel):
     def to_dict(self):
         return self.__dict__
 
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__,
-            sort_keys=True,
-            indent=4)
-
 
 class DataElementOut(BaseModel):
     level: int
@@ -51,6 +44,10 @@ class DataElementOut(BaseModel):
             default=lambda o: o.__dict__,
             sort_keys=True,
             indent=4)
+
+    def to_dict(self):
+        self.position = self.position.to_dict()
+        return self.__dict__
 
 
 class TextOut(BaseModel):

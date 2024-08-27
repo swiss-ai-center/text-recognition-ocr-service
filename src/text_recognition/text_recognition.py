@@ -6,6 +6,17 @@ import pytesseract as pt
 from PIL import Image, ImageDraw
 from typing import cast
 from models import DataElementOut, DataIn, DataElementPosition
+from json import JSONEncoder
+import json
+
+
+class CustomEncoder(JSONEncoder):
+    def default(self, o):
+        return json.dumps(
+            o,
+            default=lambda x: x.__dict__,
+            sort_keys=True,
+            indent=4)
 
 
 class TextRecognition:
@@ -18,9 +29,12 @@ class TextRecognition:
         with Image.open(config.image.file) as image:
             return cast(bytes, pt.image_to_pdf_or_hocr(image=image, lang=config.language))
 
-    def image_to_string(self, config: DataIn) -> str:
-        with Image.open(config.image.file) as image:
-            return pt.image_to_string(image=image, lang=config.language)
+    def image_to_string(self, data, language=None) -> str:
+        imageStream = io.BytesIO(data)
+        image = Image.open(imageStream)
+        if language is None:
+            return pt.image_to_string(image=image)
+        return pt.image_to_string(image=image, lang=language)
 
     def image_to_data(self, data, img_type) -> list[DataElementOut]:
 
