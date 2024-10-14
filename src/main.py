@@ -142,8 +142,7 @@ The image is assumed to be a scanned document,
 already resized to appear flat and in the right orientation, submitted as png or jpg.
 The output is returned as a json file containing the plain text as well as detected words and their bounding boxes.
 """
-api_summary = """Returns a JSON file containing the text in the input image and its position,
-using Tesseract 5 to detect text and bounding boxes.
+api_summary = """Returns a JSON file containing the text in the input image and its position.
 """
 
 # Define the FastAPI application with information
