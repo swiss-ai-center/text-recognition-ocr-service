@@ -16,11 +16,10 @@ RUN tesseract --version
 WORKDIR /app
 
 # Copy requirements file
-COPY ./requirements.txt .
-COPY ./requirements-all.txt .
-
+COPY pyproject.toml uv.lock ./
 # Install dependencies
-RUN pip install --requirement requirements.txt --requirement requirements-all.txt
+RUN pip install --no-cache-dir uv
+RUN uv sync
 
 # Copy sources
 COPY src src
@@ -41,6 +40,6 @@ WORKDIR "/app/src"
 
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata/
 ENV PATH="/usr/bin:${PATH}"
-
+ENTRYPOINT ["uv", "run"]
 # Command to run on start
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
