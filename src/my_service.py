@@ -30,6 +30,7 @@ class MyService(Service):
     # Any additional fields must be excluded for Pydantic to work
     _model: object
     _logger: Logger
+    allow_lists: bool = True
 
     def __init__(self):
         super().__init__(
@@ -67,16 +68,30 @@ class MyService(Service):
         # input_type = data["image"].type
         # ... do something with the raw data
 
-        tr = TextRecognition()
-        img_data = tr.image_to_data(data=data['image'].data, img_type=data['image'].type)
-        img_data = [dp.to_dict() for dp in img_data if len(dp.text) > 0]
-        text_data = tr.image_to_string(data=data['image'].data)
+        image_input = data["image"]
 
-        json_data = {'text': text_data,
-                     'boxes': img_data}
-        json_data = CustomEncoder().encode(json_data)
+        if isinstance(image_input, list):
+            if any(isinstance(item, list) for item in image_input):
+                raise ValueError("field 'image' must be a 1D list (lists of lists are not allowed)")
+            images = image_input
+        else:
+            images = [image_input]
+
+        if not self.allow_lists and len(images) != 1:
+            raise ValueError("field 'image' must contain exactly one item when allow_lists is false")
+
+        tr = TextRecognition()
+        results = []
+        for image in images:
+            img_data = tr.image_to_data(data=image.data, img_type=image.type)
+            img_data = [dp.to_dict() for dp in img_data if len(dp.text) > 0]
+            text_data = tr.image_to_string(data=image.data)
+
+            json_data = {"text": text_data, "boxes": img_data}
+            json_data = CustomEncoder().encode(json_data)
+            results.append(TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON))
 
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
         return {
-            "result": TaskData(data=json_data, type=FieldDescriptionType.APPLICATION_JSON),
+            "result": results,
         }

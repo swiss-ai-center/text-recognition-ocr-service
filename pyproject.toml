@@ -71,4 +71,5 @@ pythonpath = [".", "src"]
 addopts = "--cov-config=.coveragerc --cov-report xml --cov-report term-missing --cov=./src"
 
 [tool.uv.sources]
-common-code = { git = "https://github.com/swiss-ai-center/common-code.git", rev = "main" }
+# common-code = { git = "https://github.com/swiss-ai-center/common-code.git", rev = "main" }
+common-code = { path = "/Users/simonbraillard/development/pycharm_workspace/SwissAiCenter/common-code" } # TODO: To delete
